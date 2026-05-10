@@ -1,0 +1,15 @@
+appId: com.translite.app
+productName: Translite
+directories:
+  output: release
+win:
+  target:
+    - target: portable
+      arch: [x64]
+  icon: public/icon.png
+files:
+  - dist/**/*
+  - dist-electron/**/*
+  - package.json
+extraMetadata:
+  main: dist-electron/main.js
