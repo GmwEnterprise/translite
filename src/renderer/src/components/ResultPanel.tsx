@@ -12,26 +12,26 @@ export default function ResultPanel({ result, loading, error }: ResultPanelProps
   }
 
   return (
-    <div className="flex-1 p-3 border-t border-gray-700 relative">
+    <div className="flex-1 p-3 border-t border-edge relative">
       {loading && !result && (
-        <div className="text-gray-500 text-sm animate-pulse">翻译中...</div>
+        <div className="text-dim text-sm animate-pulse">翻译中...</div>
       )}
       {error && (
-        <div className="text-red-400 text-sm">{error}</div>
+        <div className="text-danger text-sm">{error}</div>
       )}
       {result && (
         <>
-          <div className="text-green-300 text-sm whitespace-pre-wrap pr-8">{result}</div>
+          <div className="text-success text-sm whitespace-pre-wrap pr-8">{result}</div>
           <button
             onClick={handleCopy}
-            className="absolute top-2 right-2 text-xs text-gray-500 hover:text-white px-2 py-1 rounded hover:bg-gray-700"
+            className="absolute top-2 right-2 text-xs text-dim hover:text-primary px-2 py-1 rounded hover:bg-muted"
           >
             复制
           </button>
         </>
       )}
       {loading && result && (
-        <span className="inline-block w-1.5 h-4 bg-green-300 animate-pulse ml-0.5" />
+        <span className="inline-block w-1.5 h-4 bg-success animate-pulse ml-0.5" />
       )}
     </div>
   )

@@ -36,6 +36,7 @@ contextBridge.exposeInMainWorld('api', {
   },
   window: {
     setAlwaysOnTop: (flag: boolean) => ipcRenderer.invoke('window:setAlwaysOnTop', flag),
-    close: () => ipcRenderer.send('window:close'),
+    close: (behavior?: 'tray' | 'quit') => ipcRenderer.send('window:close', behavior),
+    quit: () => ipcRenderer.send('window:quit'),
   },
 })

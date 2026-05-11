@@ -2,14 +2,22 @@ appId: com.translite.app
 productName: Translite
 directories:
   output: release
+  buildResources: build
+files:
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!electron.vite.config.{js,ts,mjs,cjs}'
+  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
+  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+extraResources:
+  - from: build/icon.png
+    to: icon.png
+  - from: build/tray-icon.png
+    to: tray-icon.png
 win:
   target:
     - target: portable
       arch: [x64]
-  icon: public/icon.png
-files:
-  - dist/**/*
-  - dist-electron/**/*
-  - package.json
-extraMetadata:
-  main: dist-electron/main.js
+  icon: build/icon.ico
+electronDownload:
+  mirror: https://npmmirror.com/mirrors/electron/

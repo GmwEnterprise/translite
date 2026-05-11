@@ -1,10 +1,21 @@
 import { ipcMain, BrowserWindow } from 'electron'
 import Store from 'electron-store'
 
+type CloseBehavior = 'tray' | 'quit'
+
+const languageNames: Record<string, string> = {
+  en: 'English',
+  ja: 'Japanese',
+  ko: 'Korean',
+  zh: 'Chinese',
+  fr: 'French',
+  de: 'German',
+}
+
 const store = new Store()
 const activeControllers = new Map<string, AbortController>()
 
-export function registerIpcHandlers(mainWindow: BrowserWindow) {
+export function registerIpcHandlers(mainWindow: BrowserWindow, closeWindow: (behavior?: CloseBehavior) => void) {
   ipcMain.handle('store:get', (_event, key: string) => {
     return store.get(key, null)
   })
@@ -17,8 +28,12 @@ export function registerIpcHandlers(mainWindow: BrowserWindow) {
     mainWindow.setAlwaysOnTop(flag)
   })
 
-  ipcMain.on('window:close', () => {
-    mainWindow.hide()
+  ipcMain.on('window:close', (_event, behavior?: CloseBehavior) => {
+    closeWindow(behavior)
+  })
+
+  ipcMain.on('window:quit', () => {
+    closeWindow('quit')
   })
 
   ipcMain.on('translate:start', async (event, { id, text, from, to }) => {
@@ -33,9 +48,9 @@ export function registerIpcHandlers(mainWindow: BrowserWindow) {
 
     try {
       const systemPrompt = 'You are a professional translator. Translate the following text. Only output the translation result, nothing else.'
-      const userPrompt = from === 'zh'
-        ? `Translate the following Chinese text to English:\n\n${text}`
-        : `Translate the following English text to Chinese:\n\n${text}`
+      const fromName = languageNames[from] || from
+      const toName = languageNames[to] || to
+      const userPrompt = `The user's text is expected to be either ${fromName} or ${toName}. If it is ${fromName}, translate it to ${toName}. If it is ${toName}, translate it to ${fromName}. Only output the translation result.\n\n${text}`
 
       const response = await fetch('https://api.deepseek.com/chat/completions', {
         method: 'POST',

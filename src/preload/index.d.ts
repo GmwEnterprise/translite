@@ -1,4 +1,4 @@
-export interface ElectronAPI {
+interface ElectronAPI {
   translate: {
     start: (text: string, from: string, to: string) => string
     onChunk: (id: string, callback: (chunk: string) => void) => () => void
@@ -12,7 +12,8 @@ export interface ElectronAPI {
   }
   window: {
     setAlwaysOnTop: (flag: boolean) => Promise<void>
-    close: () => void
+    close: (behavior?: 'tray' | 'quit') => void
+    quit: () => void
   }
 }
 
@@ -21,3 +22,5 @@ declare global {
     api: ElectronAPI
   }
 }
+
+export {}
