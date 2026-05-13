@@ -6,6 +6,7 @@ import Toolbar from './components/Toolbar'
 import SettingsModal, { type ApiConfig } from './components/SettingsModal'
 import CloseBehaviorModal from './components/CloseBehaviorModal'
 import LanguageSettingsModal, { type LanguageCode, type LanguagePair } from './components/LanguageSettingsModal'
+import ShortcutSettingsModal from './components/ShortcutSettingsModal'
 import { translateStream } from './lib/translate'
 import { getStore, setStore } from './lib/store'
 import { useTheme } from './lib/useTheme'
@@ -13,6 +14,11 @@ import { useTheme } from './lib/useTheme'
 type CloseBehavior = 'tray' | 'quit'
 
 const defaultLanguagePair: LanguagePair = { source: 'zh', target: 'en' }
+const defaultShortcut = 'Alt+1'
+
+function hasValidTranslateSource(config: ApiConfig): boolean {
+  return Boolean(config.baseURL.trim() && config.apiKey.trim() && config.model.trim())
+}
 
 function isLanguageCode(value: unknown): value is LanguageCode {
   return value === 'en' || value === 'ja' || value === 'ko' || value === 'zh' || value === 'fr' || value === 'de'
@@ -40,10 +46,13 @@ export default function App() {
   const [languagePair, setLanguagePair] = useState<LanguagePair>(defaultLanguagePair)
   const [showSettings, setShowSettings] = useState(false)
   const [showLanguageSettings, setShowLanguageSettings] = useState(false)
+  const [showShortcutSettings, setShowShortcutSettings] = useState(false)
   const [showCloseBehavior, setShowCloseBehavior] = useState(false)
   const [closeBehaviorAction, setCloseBehaviorAction] = useState<'close' | 'settings'>('close')
-  const [closeBehavior, setCloseBehavior] = useState<CloseBehavior>('tray')
+  const [closeBehavior, setCloseBehavior] = useState<CloseBehavior | null>(null)
+  const [closeBehaviorLoaded, setCloseBehaviorLoaded] = useState(false)
   const [apiConfig, setApiConfig] = useState<ApiConfig>({ baseURL: '', apiKey: '', model: '' })
+  const [shortcut, setShortcut] = useState(defaultShortcut)
   const { theme, toggleTheme } = useTheme()
 
   useEffect(() => {
@@ -65,9 +74,19 @@ export default function App() {
     })
     getStore('closeBehavior').then((v) => {
       if (v === 'quit' || v === 'tray') setCloseBehavior(v)
+      setCloseBehaviorLoaded(true)
     })
     getStore('languagePair').then((v) => {
       setLanguagePair(parseLanguagePair(v))
+    })
+    getStore('globalShortcut').then((v) => {
+      setShortcut(v || defaultShortcut)
+    })
+  }, [])
+
+  useEffect(() => {
+    return window.api.window.onSetInputFromClipboard((text) => {
+      setInput(text)
     })
   }, [])
 
@@ -75,6 +94,12 @@ export default function App() {
     if (!input.trim() || loading) return
     setResult('')
     setError(null)
+
+    if (!hasValidTranslateSource(apiConfig)) {
+      setResult('请配置翻译源')
+      return
+    }
+
     setLoading(true)
 
     translateStream(input, languagePair.source, languagePair.target, (chunk) => {
@@ -85,7 +110,7 @@ export default function App() {
         setError(err.message)
         setLoading(false)
       })
-  }, [input, loading, languagePair])
+  }, [input, loading, languagePair, apiConfig])
 
   function handleToggleAlwaysOnTop() {
     const next = !alwaysOnTop
@@ -115,13 +140,43 @@ export default function App() {
     if (closeBehaviorAction === 'close') window.api.window.close(value)
   }
 
+  async function handleClose() {
+    if (!closeBehaviorLoaded) {
+      const saved = await getStore('closeBehavior')
+      setCloseBehaviorLoaded(true)
+      if (saved === 'quit' || saved === 'tray') {
+        setCloseBehavior(saved)
+        window.api.window.close(saved)
+        return
+      }
+    }
+
+    if (closeBehavior) {
+      window.api.window.close(closeBehavior)
+      return
+    }
+
+    setCloseBehaviorAction('close')
+    setShowCloseBehavior(true)
+  }
+
+  async function handleSaveShortcut(value: string): Promise<boolean> {
+    const saved = await window.api.shortcut.set(value)
+    if (saved) {
+      setShortcut(saved)
+      setShowShortcutSettings(false)
+    }
+    return Boolean(saved)
+  }
+
   return (
     <div className="h-screen flex flex-col bg-base relative">
       <TitleBar
         onOpenSettings={() => setShowSettings(true)}
         onOpenLanguageSettings={() => setShowLanguageSettings(true)}
+        onOpenShortcutSettings={() => setShowShortcutSettings(true)}
         onOpenCloseBehavior={() => { setCloseBehaviorAction('settings'); setShowCloseBehavior(true) }}
-        onClose={() => { setCloseBehaviorAction('close'); setShowCloseBehavior(true) }}
+        onClose={handleClose}
         onQuit={() => window.api.window.quit()}
       />
       <InputPanel value={input} onChange={setInput} onSubmit={handleSubmit} loading={loading} />
@@ -145,6 +200,13 @@ export default function App() {
           value={languagePair}
           onSave={handleSaveLanguagePair}
           onClose={() => setShowLanguageSettings(false)}
+        />
+      )}
+      {showShortcutSettings && (
+        <ShortcutSettingsModal
+          value={shortcut}
+          onSave={handleSaveShortcut}
+          onClose={() => setShowShortcutSettings(false)}
         />
       )}
       {showCloseBehavior && (

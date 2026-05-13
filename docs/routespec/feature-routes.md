@@ -25,20 +25,21 @@
 
 ### 全局快捷键
 
-- Description: `Alt+T` 全局呼出/隐藏翻译窗口
-- Entry: `src/main/index.ts:53` (`globalShortcut.register`)
-- Core: `src/main/index.ts:53-61`
+- Description: 默认 `Alt+1` 全局呼出/隐藏翻译窗口，显示窗口时读取系统剪贴板纯文本并写入输入区，支持在设置菜单中修改快捷键
+- Entry: `src/main/index.ts` (`registerGlobalShortcut` / `globalShortcut.register`)
+- Core: `src/main/index.ts` (快捷键读取、规范化、注册与重新注册、剪贴板文本读取), `src/renderer/src/App.tsx` (接收剪贴板文本并写入输入区), `src/renderer/src/components/ShortcutSettingsModal.tsx` (快捷键配置弹窗)
+- Notes: store 键 `globalShortcut`；快捷键修改通过 `shortcut:set` IPC 注册，注册失败时保留原快捷键；剪贴板注入通过 `input:setFromClipboard` 事件
 
 ### IPC 通信
 
 - Description: preload 暴露 `window.api`，主进程注册 IPC handlers
 - Entry: `src/preload/index.ts` (contextBridge 暴露 API)
 - Core: `src/main/ipc-handlers.ts`
-- Notes: 通道包括 `store:get/set`, `window:setAlwaysOnTop`, `window:close`, `window:quit`, `translate:start/chunk/done/error/abort`
+- Notes: 通道包括 `store:get/set`, `window:setAlwaysOnTop`, `window:close`, `window:quit`, `shortcut:set`, `input:setFromClipboard`, `translate:start/chunk/done/error/abort`
 
 ### 翻译引擎
 
-- Description: 可插拔翻译源架构，当前内置 OpenAI Compatible 源，支持任意兼容 OpenAI Chat Completions API 的服务（DeepSeek、OpenAI 等），SSE 流式返回翻译结果
+- Description: 可插拔翻译源架构，当前内置 AI 翻译源（OpenAI 兼容 API），支持任意兼容 OpenAI Chat Completions API 的服务（DeepSeek、OpenAI 等），SSE 流式返回翻译结果
 - Entry: `src/main/translate/index.ts`（注册表）, `src/main/ipc-handlers.ts:35`（translate:start handler）
 - Core: `src/main/translate/sources/openai-compatible.ts`（OpenAI Compatible 实现：fetch + SSE 解析）
 - Notes: store 键 `apiBaseURL`（到 /v1）、`apiKey`、`apiModel`；默认源 id `openai-compatible`；支持中/英/日/韩/法/德语言名称映射；AbortController 支持取消
@@ -47,7 +48,7 @@
 
 ### 输入面板
 
-- Description: textarea 输入区，Enter 触发翻译
+- Description: textarea 输入区，Enter 或右下角按钮触发翻译，空白内容和翻译中不触发
 - Entry: `src/renderer/src/components/InputPanel.tsx`
 - Core: `src/renderer/src/App.tsx:87` (使用处)
 
@@ -65,7 +66,7 @@
 
 ### 标题栏
 
-- Description: 可拖拽标题栏 + 左上角菜单（设置 API、设置语言、设置关闭行为、退出应用）+ 关闭按钮
+- Description: 可拖拽标题栏 + 左上角菜单（设置 API、设置语言、设置快捷键、设置关闭行为、退出应用）+ 关闭按钮
 - Entry: `src/renderer/src/components/TitleBar.tsx`
 
 ### 语言设置弹窗
@@ -76,13 +77,13 @@
 
 ### 关闭行为弹窗
 
-- Description: 选择关闭到托盘或退出应用，并持久化到 electron-store
+- Description: 首次点击关闭按钮且未设置时选择关闭到托盘或退出应用，选择后持久化；后续点击关闭按钮直接执行已保存行为
 - Entry: `src/renderer/src/components/CloseBehaviorModal.tsx`
 - Core: `src/renderer/src/App.tsx` (读取/保存 `closeBehavior` 并调用 `window:close`)
 
 ### 设置弹窗
 
-- Description: API 配置弹窗（Base URL、API Key、Model），首次启动无 API Key 时自动弹出
+- Description: 翻译源配置弹窗（选择翻译源、OpenAI BaseURL、API Key、Model），首次启动无 API Key 时自动弹出
 - Entry: `src/renderer/src/components/SettingsModal.tsx`
 - Core: `src/renderer/src/App.tsx`（读取/保存 `apiBaseURL`、`apiKey`、`apiModel`）
 

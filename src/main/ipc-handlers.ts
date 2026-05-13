@@ -7,7 +7,11 @@ type CloseBehavior = 'tray' | 'quit'
 const store = new Store()
 const activeControllers = new Map<string, AbortController>()
 
-export function registerIpcHandlers(mainWindow: BrowserWindow, closeWindow: (behavior?: CloseBehavior) => void) {
+export function registerIpcHandlers(
+  mainWindow: BrowserWindow,
+  closeWindow: (behavior?: CloseBehavior) => void,
+  registerGlobalShortcut: (shortcut: string) => string | null,
+) {
   ipcMain.handle('store:get', (_event, key: string) => {
     return store.get(key, null)
   })
@@ -26,6 +30,10 @@ export function registerIpcHandlers(mainWindow: BrowserWindow, closeWindow: (beh
 
   ipcMain.on('window:quit', () => {
     closeWindow('quit')
+  })
+
+  ipcMain.handle('shortcut:set', (_event, shortcut: string) => {
+    return registerGlobalShortcut(shortcut)
   })
 
   ipcMain.handle('translate:sources', () => {

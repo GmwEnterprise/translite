@@ -18,8 +18,12 @@ interface ElectronAPI {
   }
   window: {
     setAlwaysOnTop: (flag: boolean) => Promise<void>
+    onSetInputFromClipboard: (callback: (text: string) => void) => () => void
     close: (behavior?: 'tray' | 'quit') => void
     quit: () => void
+  }
+  shortcut: {
+    set: (shortcut: string) => Promise<string | null>
   }
 }
 

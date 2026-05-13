@@ -1,7 +1,7 @@
 type CloseBehavior = 'tray' | 'quit'
 
 interface CloseBehaviorModalProps {
-  value: CloseBehavior
+  value: CloseBehavior | null
   onSelect: (value: CloseBehavior) => void
   onCancel: () => void
 }

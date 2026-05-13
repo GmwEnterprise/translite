@@ -1,4 +1,4 @@
-import { app, BrowserWindow, globalShortcut, Menu, nativeImage, screen, Tray, type Rectangle } from 'electron'
+import { app, BrowserWindow, clipboard, globalShortcut, Menu, nativeImage, screen, Tray, type Rectangle } from 'electron'
 import { join } from 'path'
 import Store from 'electron-store'
 import { registerIpcHandlers } from './ipc-handlers'
@@ -15,8 +15,11 @@ let isQuitting = false
 const store = new Store()
 const windowBoundsKey = 'windowBounds'
 const closeBehaviorKey = 'closeBehavior'
+const shortcutKey = 'globalShortcut'
+const defaultShortcut = 'Alt+1'
 const minWidth = 360
 const minHeight = 420
+let registeredShortcut = ''
 
 function resolveIconPath(name: string): string {
   if (app.isPackaged) {
@@ -80,6 +83,62 @@ function showWindow() {
   if (!mainWindow) return
   mainWindow.show()
   mainWindow.focus()
+}
+
+function sendClipboardTextToInput() {
+  if (!mainWindow || mainWindow.isDestroyed()) return
+
+  const text = clipboard.readText().trim()
+  if (text) mainWindow.webContents.send('input:setFromClipboard', text)
+}
+
+function toggleWindow() {
+  if (!mainWindow) return
+  if (mainWindow.isVisible()) {
+    closeWindow('tray')
+  } else {
+    sendClipboardTextToInput()
+    showWindow()
+  }
+}
+
+function normalizeShortcut(value: string): string {
+  const aliases: Record<string, string> = {
+    alt: 'Alt',
+    option: 'Alt',
+    ctrl: 'Control',
+    control: 'Control',
+    shift: 'Shift',
+    cmd: 'Command',
+    command: 'Command',
+    meta: 'CommandOrControl',
+    super: 'Super',
+  }
+
+  return value
+    .split('+')
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part) => aliases[part.toLowerCase()] || (part.length === 1 ? part.toUpperCase() : part))
+    .join('+')
+}
+
+function registerGlobalShortcut(value: string): string | null {
+  const shortcut = normalizeShortcut(value)
+  if (!shortcut) return null
+  if (shortcut === registeredShortcut) return shortcut
+
+  if (registeredShortcut) globalShortcut.unregister(registeredShortcut)
+
+  const registered = globalShortcut.register(shortcut, toggleWindow)
+  if (!registered) {
+    if (registeredShortcut) globalShortcut.register(registeredShortcut, toggleWindow)
+    return null
+  }
+
+  registeredShortcut = shortcut
+  store.set(shortcutKey, shortcut)
+  return shortcut
 }
 
 function quitApp() {
@@ -151,20 +210,14 @@ function createWindow() {
     mainWindow?.show()
   })
 
-  registerIpcHandlers(mainWindow, closeWindow)
+  registerIpcHandlers(mainWindow, closeWindow, registerGlobalShortcut)
 }
 
 app.whenReady().then(() => {
   createWindow()
 
-  globalShortcut.register('Alt+T', () => {
-    if (!mainWindow) return
-    if (mainWindow.isVisible()) {
-      closeWindow('tray')
-    } else {
-      showWindow()
-    }
-  })
+  const savedShortcut = store.get(shortcutKey, defaultShortcut) as string
+  if (!registerGlobalShortcut(savedShortcut)) registerGlobalShortcut(defaultShortcut)
 })
 
 app.on('window-all-closed', () => {

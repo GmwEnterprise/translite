@@ -9,14 +9,12 @@ export interface ApiConfig {
 interface SourceOption {
   id: string
   label: string
-  description: string
 }
 
 const sourceOptions: SourceOption[] = [
   {
     id: 'openai-compatible',
-    label: 'OpenAI 兼容 API',
-    description: '支持 DeepSeek、OpenAI、Kimi、Ollama 等兼容接口',
+    label: 'AI 翻译',
   },
 ]
 
@@ -28,6 +26,7 @@ interface SettingsModalProps {
 
 export default function SettingsModal({ config, onSave, onClose }: SettingsModalProps) {
   const [selectedSource, setSelectedSource] = useState('openai-compatible')
+  const [showSourceOptions, setShowSourceOptions] = useState(false)
   const [baseURL, setBaseURL] = useState(config.baseURL)
   const [apiKey, setApiKey] = useState(config.apiKey)
   const [model, setModel] = useState(config.model)
@@ -41,27 +40,46 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
   }
 
   const canSave = baseURL.trim() && apiKey.trim() && model.trim()
+  const selectedSourceLabel = sourceOptions.find((source) => source.id === selectedSource)?.label || ''
 
   return (
     <div className="absolute inset-0 bg-overlay flex items-center justify-center z-50">
       <div className="bg-surface rounded-lg p-5 w-80 shadow-xl border border-edge max-h-[90vh] overflow-y-auto">
         <h2 className="text-primary text-sm font-medium mb-3">设置翻译源</h2>
-        <div className="space-y-3">
-          {sourceOptions.map((source) => (
-            <button
-              key={source.id}
-              onClick={() => setSelectedSource(source.id)}
-              className={`w-full text-left px-3 py-2 rounded border text-sm ${selectedSource === source.id ? 'border-accent bg-accent/20 text-primary' : 'border-edge text-secondary hover:bg-muted'}`}
-            >
-              <div className="font-medium">{source.label}</div>
-              <div className="text-xs text-dim mt-0.5">{source.description}</div>
-            </button>
-          ))}
+        <div className="relative">
+          <span className="block text-xs text-secondary mb-1">选择翻译源</span>
+          <button
+            type="button"
+            className="w-full flex items-center justify-between bg-muted text-primary text-sm px-3 py-2 rounded outline-none border border-edge hover:border-accent focus:border-accent"
+            onClick={() => setShowSourceOptions((visible) => !visible)}
+          >
+            <span>{selectedSourceLabel}</span>
+            <svg className={`w-4 h-4 text-secondary transition-transform ${showSourceOptions ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+            </svg>
+          </button>
+          {showSourceOptions && (
+            <div className="absolute z-10 mt-1 w-full rounded border border-edge bg-surface shadow-xl overflow-hidden">
+              {sourceOptions.map((source) => (
+                <button
+                  key={source.id}
+                  type="button"
+                  className={`w-full text-left text-sm px-3 py-2 ${selectedSource === source.id ? 'bg-accent/20 text-primary' : 'text-secondary hover:bg-muted hover:text-primary'}`}
+                  onClick={() => {
+                    setSelectedSource(source.id)
+                    setShowSourceOptions(false)
+                  }}
+                >
+                  {source.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         {selectedSource === 'openai-compatible' && (
           <div className="space-y-3 mt-4">
             <label className="block">
-              <span className="block text-xs text-secondary mb-1">Base URL</span>
+              <span className="block text-xs text-secondary mb-1">OpenAI BaseURL</span>
               <input
                 type="url"
                 className="w-full bg-muted text-primary text-sm px-3 py-2 rounded outline-none border border-edge focus:border-accent"

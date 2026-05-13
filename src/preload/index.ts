@@ -37,7 +37,15 @@ contextBridge.exposeInMainWorld('api', {
   },
   window: {
     setAlwaysOnTop: (flag: boolean) => ipcRenderer.invoke('window:setAlwaysOnTop', flag),
+    onSetInputFromClipboard: (callback: (text: string) => void) => {
+      const listener = (_e: Electron.IpcRendererEvent, text: string) => callback(text)
+      ipcRenderer.on('input:setFromClipboard', listener)
+      return () => { ipcRenderer.removeListener('input:setFromClipboard', listener) }
+    },
     close: (behavior?: 'tray' | 'quit') => ipcRenderer.send('window:close', behavior),
     quit: () => ipcRenderer.send('window:quit'),
+  },
+  shortcut: {
+    set: (shortcut: string) => ipcRenderer.invoke('shortcut:set', shortcut),
   },
 })
