@@ -3,7 +3,7 @@ import TitleBar from './components/TitleBar'
 import InputPanel from './components/InputPanel'
 import ResultPanel from './components/ResultPanel'
 import Toolbar from './components/Toolbar'
-import SettingsModal from './components/SettingsModal'
+import SettingsModal, { type ApiConfig } from './components/SettingsModal'
 import CloseBehaviorModal from './components/CloseBehaviorModal'
 import LanguageSettingsModal, { type LanguageCode, type LanguagePair } from './components/LanguageSettingsModal'
 import { translateStream } from './lib/translate'
@@ -43,15 +43,20 @@ export default function App() {
   const [showCloseBehavior, setShowCloseBehavior] = useState(false)
   const [closeBehaviorAction, setCloseBehaviorAction] = useState<'close' | 'settings'>('close')
   const [closeBehavior, setCloseBehavior] = useState<CloseBehavior>('tray')
-  const [apiKey, setApiKey] = useState('')
+  const [apiConfig, setApiConfig] = useState<ApiConfig>({ baseURL: '', apiKey: '', model: '' })
   const { theme, toggleTheme } = useTheme()
 
   useEffect(() => {
-    getStore('deepseekApiKey').then((key) => {
-      if (!key) {
+    Promise.all([
+      getStore('apiBaseURL'),
+      getStore('apiKey'),
+      getStore('apiModel'),
+    ]).then(([baseURL, apiKey, model]) => {
+      const config: ApiConfig = { baseURL: baseURL || '', apiKey: apiKey || '', model: model || '' }
+      setApiConfig(config)
+      if (!config.apiKey) {
         setShowSettings(true)
       }
-      setApiKey(key || '')
     })
     getStore('alwaysOnTop').then((v) => {
       const flag = v !== 'false'
@@ -89,9 +94,11 @@ export default function App() {
     setStore('alwaysOnTop', String(next))
   }
 
-  function handleSaveApiKey(key: string) {
-    setApiKey(key)
-    setStore('deepseekApiKey', key)
+  function handleSaveApiConfig(config: ApiConfig) {
+    setApiConfig(config)
+    setStore('apiBaseURL', config.baseURL)
+    setStore('apiKey', config.apiKey)
+    setStore('apiModel', config.model)
     setShowSettings(false)
   }
 
@@ -124,11 +131,12 @@ export default function App() {
         onToggleTheme={toggleTheme}
         alwaysOnTop={alwaysOnTop}
         onToggleAlwaysOnTop={handleToggleAlwaysOnTop}
+        languagePair={languagePair}
       />
       {showSettings && (
         <SettingsModal
-          apiKey={apiKey}
-          onSave={handleSaveApiKey}
+          config={apiConfig}
+          onSave={handleSaveApiConfig}
           onClose={() => setShowSettings(false)}
         />
       )}

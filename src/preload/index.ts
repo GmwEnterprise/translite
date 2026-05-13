@@ -29,6 +29,7 @@ contextBridge.exposeInMainWorld('api', {
       return () => { ipcRenderer.removeListener('translate:error', listener) }
     },
     abort: (id: string) => { ipcRenderer.send('translate:abort', id) },
+    getSources: () => ipcRenderer.invoke('translate:sources'),
   },
   store: {
     get: (key: string) => ipcRenderer.invoke('store:get', key),

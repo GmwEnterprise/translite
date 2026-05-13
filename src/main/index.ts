@@ -2,6 +2,10 @@ import { app, BrowserWindow, globalShortcut, Menu, nativeImage, screen, Tray, ty
 import { join } from 'path'
 import Store from 'electron-store'
 import { registerIpcHandlers } from './ipc-handlers'
+import { registerSource } from './translate'
+import { openaiCompatibleSource } from './translate/sources/openai-compatible'
+
+registerSource(openaiCompatibleSource)
 
 type CloseBehavior = 'tray' | 'quit'
 

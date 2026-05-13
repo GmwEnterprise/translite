@@ -38,10 +38,10 @@
 
 ### 翻译引擎
 
-- Description: 调用 DeepSeek Chat Completions API，按配置语言对生成自动双向翻译提示词，SSE 流式返回翻译结果
-- Entry: `src/main/ipc-handlers.ts:24` (`translate:start` handler)
-- Core: `src/main/ipc-handlers.ts:34-100` (fetch + SSE 解析)
-- Notes: model `deepseek-chat`，支持中/英/日/韩/法/德语言名称映射，AbortController 支持取消
+- Description: 可插拔翻译源架构，当前内置 OpenAI Compatible 源，支持任意兼容 OpenAI Chat Completions API 的服务（DeepSeek、OpenAI 等），SSE 流式返回翻译结果
+- Entry: `src/main/translate/index.ts`（注册表）, `src/main/ipc-handlers.ts:35`（translate:start handler）
+- Core: `src/main/translate/sources/openai-compatible.ts`（OpenAI Compatible 实现：fetch + SSE 解析）
+- Notes: store 键 `apiBaseURL`（到 /v1）、`apiKey`、`apiModel`；默认源 id `openai-compatible`；支持中/英/日/韩/法/德语言名称映射；AbortController 支持取消
 
 ## UI Components
 
@@ -65,7 +65,7 @@
 
 ### 标题栏
 
-- Description: 可拖拽标题栏 + 左上角菜单（设置 API Key、设置语言、设置关闭行为、退出应用）+ 关闭按钮
+- Description: 可拖拽标题栏 + 左上角菜单（设置 API、设置语言、设置关闭行为、退出应用）+ 关闭按钮
 - Entry: `src/renderer/src/components/TitleBar.tsx`
 
 ### 语言设置弹窗
@@ -82,9 +82,9 @@
 
 ### 设置弹窗
 
-- Description: DeepSeek API Key 输入/保存弹窗，首次启动自动弹出
+- Description: API 配置弹窗（Base URL、API Key、Model），首次启动无 API Key 时自动弹出
 - Entry: `src/renderer/src/components/SettingsModal.tsx`
-- Core: `src/renderer/src/App.tsx:96-102`
+- Core: `src/renderer/src/App.tsx`（读取/保存 `apiBaseURL`、`apiKey`、`apiModel`）
 
 ## Lib
 

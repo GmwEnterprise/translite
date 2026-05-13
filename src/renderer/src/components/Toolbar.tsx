@@ -1,13 +1,15 @@
 import { type Theme } from '../lib/useTheme'
+import { type LanguagePair, getLanguageLabel } from './LanguageSettingsModal'
 
 interface ToolbarProps {
   theme: Theme
   onToggleTheme: () => void
   alwaysOnTop: boolean
   onToggleAlwaysOnTop: () => void
+  languagePair: LanguagePair
 }
 
-export default function Toolbar({ theme, onToggleTheme, alwaysOnTop, onToggleAlwaysOnTop }: ToolbarProps) {
+export default function Toolbar({ theme, onToggleTheme, alwaysOnTop, onToggleAlwaysOnTop, languagePair }: ToolbarProps) {
   return (
     <div className="flex items-center justify-between h-9 px-3 bg-surface border-t border-edge select-none">
       <div className="flex items-center gap-2">
@@ -26,6 +28,7 @@ export default function Toolbar({ theme, onToggleTheme, alwaysOnTop, onToggleAlw
             <path d="M9 15l-5 5" />
           </svg>
         </button>
+        <span className="text-xs text-dim">{getLanguageLabel(languagePair.source)} ↔ {getLanguageLabel(languagePair.target)}</span>
       </div>
       <button
         onClick={onToggleTheme}

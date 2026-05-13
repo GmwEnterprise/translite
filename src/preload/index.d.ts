@@ -1,3 +1,8 @@
+interface TranslateSourceInfo {
+  id: string
+  name: string
+}
+
 interface ElectronAPI {
   translate: {
     start: (text: string, from: string, to: string) => string
@@ -5,6 +10,7 @@ interface ElectronAPI {
     onDone: (id: string, callback: () => void) => () => void
     onError: (id: string, callback: (err: string) => void) => () => void
     abort: (id: string) => void
+    getSources: () => Promise<TranslateSourceInfo[]>
   }
   store: {
     get: (key: string) => Promise<string | null>
