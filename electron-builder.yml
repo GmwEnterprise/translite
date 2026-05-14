@@ -16,8 +16,15 @@ extraResources:
     to: tray-icon.png
 win:
   target:
-    - target: portable
+    - target: nsis
       arch: [x64]
   icon: build/icon.ico
+  artifactName: ${name}-${version}-setup.${ext}
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  deleteAppDataOnUninstall: true
+  shortcutName: ${productName}
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/

@@ -104,7 +104,7 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
               <input
                 type="text"
                 className="w-full bg-muted text-primary text-sm px-3 py-2 rounded outline-none border border-edge focus:border-accent"
-                placeholder="deepseek-chat"
+                placeholder="deepseek-v4-flash"
                 value={model}
                 onChange={(e) => setModel(e.target.value)}
               />

@@ -1,12 +1,12 @@
 {
   "name": "translite",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "A lightweight translation tool powered by DeepSeek",
   "main": "./out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",
     "start": "electron-vite preview",
-    "build:win": "electron-vite build && electron-builder --win",
+    "build:win": "node -e \"require('node:fs').rmSync('release', { recursive: true, force: true })\" && electron-vite build && electron-builder --win",
     "build:mac": "echo \"Mac build is not supported yet\" && exit 1",
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",

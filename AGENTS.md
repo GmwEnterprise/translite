@@ -4,7 +4,8 @@
 
 - 技术栈：Electron + React + Tailwind CSS + TypeScript
 - 目录结构：`src/main/`（主进程）、`src/preload/`（预加载）、`src/renderer/src/`（渲染进程）
-- 构建输出：`out/`
+- electron-vite 构建输出：`out/`
+- Windows 安装包输出：`release/`
 
 ## 环境说明
 
@@ -14,4 +15,18 @@
 
 - `pnpm dev` — 启动开发模式
 - `pnpm typecheck` — 类型检查
-- `pnpm build:win` — 构建 Windows 安装包
+- `pnpm build:win` — 清理 `release/` 后构建 Windows 安装包
+
+## 版本信息
+
+当前版本：`1.0.0`
+
+## 发布流程
+
+1. 更新 `package.json` 中的 `version` 字段
+2. 提交并推送代码
+3. 在宿主机执行 `pnpm build:win` 打包安装文件，确保 `release/` 下生成对应版本号的安装文件
+4. 创建并推送 tag：`git tag v<version> && git push origin v<version>`
+5. 发布 release：`gh release create v<version> --title "v<version>" --notes "Release notes"`
+
+**注意：发布前必须确认用户已在宿主机上完成打包，否则应提醒用户先执行 `pnpm build:win`。**

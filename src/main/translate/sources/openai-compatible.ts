@@ -99,6 +99,8 @@ export const openaiCompatibleSource: TranslateSource = {
         { role: 'user', content: userContent },
       ],
       stream: true,
+      enable_thinking: false,
+      thinking: { type: 'disabled' },
       response_format: { type: 'json_object' },
     }
 

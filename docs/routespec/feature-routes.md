@@ -13,6 +13,16 @@
 - Electron Main: 窗口管理, 全局快捷键, IPC 通信, 翻译引擎
 - UI Components: 输入面板, 结果面板, 工具栏, 设置弹窗
 - Lib: 语言检测, 翻译调用, 设置存储
+- Build/Release: Windows 安装包构建与发布
+
+## Build/Release
+
+### Windows 安装包构建
+
+- Description: `pnpm build:win` 先清理 `release/`，再执行 electron-vite 构建与 electron-builder Windows 打包；安装包输出到 `release/`
+- Entry: `package.json` (`scripts.build:win`)
+- Core: `package.json` (`build:win` 脚本), `electron-builder.yml` (`directories.output`, `win.artifactName`)
+- Notes: 当前安装包命名格式为 `${name}-${version}-setup.${ext}`；发布前需确认用户已在宿主机完成对应版本号安装包打包
 
 ## Electron Main
 
