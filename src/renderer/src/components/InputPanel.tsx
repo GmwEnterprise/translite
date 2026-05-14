@@ -30,11 +30,15 @@ export default function InputPanel({ value, onChange, onSubmit, loading }: Input
       />
       <button
         type="button"
-        className="absolute right-8 bottom-4 text-xs text-accent bg-accent/10 hover:bg-accent/15 border border-accent/20 disabled:text-dim disabled:bg-muted/50 disabled:border-edge disabled:cursor-not-allowed px-3 py-1.5 rounded-full shadow-sm"
+        className="absolute right-8 bottom-4 text-accent bg-accent/10 hover:bg-accent/15 border border-accent/20 disabled:text-dim disabled:bg-muted/50 disabled:border-edge disabled:cursor-not-allowed p-2 rounded-full shadow-sm dark:text-accent-hover"
         onClick={onSubmit}
         disabled={!canSubmit}
+        title="翻译"
       >
-        翻译
+        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M5 12h14" />
+          <path d="m12 5 7 7-7 7" />
+        </svg>
       </button>
     </div>
   )

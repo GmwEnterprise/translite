@@ -7,9 +7,10 @@ interface ToolbarProps {
   alwaysOnTop: boolean
   onToggleAlwaysOnTop: () => void
   languagePair: LanguagePair
+  onOpenLanguageSettings: () => void
 }
 
-export default function Toolbar({ theme, onToggleTheme, alwaysOnTop, onToggleAlwaysOnTop, languagePair }: ToolbarProps) {
+export default function Toolbar({ theme, onToggleTheme, alwaysOnTop, onToggleAlwaysOnTop, languagePair, onOpenLanguageSettings }: ToolbarProps) {
   return (
     <div className="flex items-center justify-between h-9 px-3 bg-surface border-t border-edge select-none">
       <div className="flex items-center gap-2">
@@ -28,7 +29,13 @@ export default function Toolbar({ theme, onToggleTheme, alwaysOnTop, onToggleAlw
             <path d="M9 15l-5 5" />
           </svg>
         </button>
-        <span className="text-xs text-dim">{getLanguageLabel(languagePair.source)} ↔ {getLanguageLabel(languagePair.target)}</span>
+        <button
+          onClick={onOpenLanguageSettings}
+          className="text-xs text-dim hover:text-primary cursor-pointer"
+          title="设置互译语言"
+        >
+          {getLanguageLabel(languagePair.source)} ↔ {getLanguageLabel(languagePair.target)}
+        </button>
       </div>
       <button
         onClick={onToggleTheme}

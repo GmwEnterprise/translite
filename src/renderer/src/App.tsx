@@ -187,6 +187,7 @@ export default function App() {
         alwaysOnTop={alwaysOnTop}
         onToggleAlwaysOnTop={handleToggleAlwaysOnTop}
         languagePair={languagePair}
+        onOpenLanguageSettings={() => setShowLanguageSettings(true)}
       />
       {showSettings && (
         <SettingsModal
